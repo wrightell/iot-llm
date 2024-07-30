@@ -1,7 +1,7 @@
 import ollama
 from scapy.all import rdpcap
 import pandas as pd
-
+import json
 def generate_embedding(model,prompt):
     return ollama.embeddings(model=model,prompt=prompt)
 
@@ -34,7 +34,7 @@ def get_packet_metadata(packet):
     if packet.haslayer('TCP'):
         metadata['tcp_sport'] = packet['TCP'].sport
         metadata['tcp_dport'] = packet['TCP'].dport
-        metadata['tcp_flags'] = packet['TCP'].flags
+        metadata['tcp_flags'] = str(packet['TCP'].flags)
     else:
         metadata['tcp_sport'] = metadata['tcp_dport'] = metadata['tcp_flags'] = ''   
 
@@ -56,7 +56,7 @@ def get_data_from_file(pcap_file):
         'raw':[]
     }
     for packet in extract_packets(pcap_file):
-        data['metadata'].append(get_packet_metadata(packet))
+        data['metadata'].append(json.dumps(get_packet_metadata(packet)))
         data['summary'].append(get_packet_summary(packet))
         data['raw'].append(get_bytes(packet))
 
